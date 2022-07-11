@@ -1,0 +1,46 @@
+#!/bin/bash
+# Converts all X.svg in manuscript into the specified output format. (-> X.svg.png in tmp )
+# Usage: convert-svg-files 'output_format'
+# Example: convert-svg-files eps
+
+shopt -s nullglob # Ignore empty directories
+
+if test $# != 2
+then
+    echo "Please specify exactly two parameter with an output format like: png or eps, and a dpi number like 300."
+    exit 1
+fi
+
+
+pushd manuscript/resources/
+
+for subdir in */; do
+    echo "Entering ${subdir}"
+    mkdir -p ../../tmp/resources/${subdir}
+    
+    for svgfile in ${subdir}*.svg; do
+        if [[ ${svgfile} == *.drawio.svg ]]; then
+            echo "Converting ${svgfile} with Draw.io"
+            if [ ${1} == png ]; then
+                draw.io --export --output ../../tmp/resources/${svgfile}.png ${svgfile}
+            elif  [ ${1} == eps ]; then
+                draw.io --export --crop --output ../../tmp/resources/${svgfile}.pdf ${svgfile}
+                pdftops -eps -r ${2} ../../tmp/resources/${svgfile}.pdf
+            else
+                exit 2
+            fi
+        else
+            echo "Converting ${svgfile} with Inkscape"
+            inkscape \
+                --export-dpi=${2} \
+                --export-filename=../../tmp/resources/${svgfile}.${1} \
+                ${svgfile}
+# Interesting Inkscape parameters:
+#                --export-ps-level=3 \
+#                --export-text-to-path \
+#                --export-plain-svg \
+        fi
+    done
+done
+
+popd
