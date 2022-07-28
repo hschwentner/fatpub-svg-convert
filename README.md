@@ -5,7 +5,7 @@
 Building the docker image:
 
 ```fish
-docker build -t fatpub-svg-convert .
+docker build --platform amd64 -t fatpub-svg-convert .
 ```
 
 Running the docker image:
