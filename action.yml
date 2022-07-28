@@ -1,0 +1,20 @@
+# action.yml
+name: 'GitHub Action for SVG conversion'
+description: 'Convert SVG files to PNG or EPS with Draw.io and Inkscape ready for Fatpub'
+inputs:
+  indir:
+    required: true
+  outdir:
+    required: true
+  outformat: 
+     required: true
+  dpi:
+     required: true
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.indir }}
+    - ${{ inputs.outdir }}
+    - ${{ inputs.outformat }}
+    - ${{ inputs.dpi }}

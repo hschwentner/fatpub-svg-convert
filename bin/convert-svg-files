@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
-# Converts all X.svg in INDIR into the specified output format. (-> X.svg.png in tmp )
-# Usage: convert-svg-files 'output_format'
-# Example: convert-svg-files eps
+#
+# Converts all X.svg in INDIR into the specified output format. (X.svg -> X.svg.png)
+#
+# Usage: convert-svg-files 'input directory' 'output directory' 'output_format' 'dpi for PNG conversion'
+# Example: convert-svg-files manuscript/images tmp/images eps 1200
 
 
 # Ignore empty directories
