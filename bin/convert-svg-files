@@ -55,6 +55,8 @@ for subdir in */; do
             elif  [ ${OUTPUTFORMAT} == eps ]; then
                 ${DRAWIO} --export --crop --output ${OUTDIR}/${svgfile}.pdf ${svgfile} \
                 && pdftops -eps -r ${DPI} ${OUTDIR}/${svgfile}.pdf \
+                && rm ${OUTDIR}/${svgfile}.pdf \
+                && echo "Converted ${svgfile} with Draw.io" \
                 & ${FOREGROUND}
             else
                 exit 2
