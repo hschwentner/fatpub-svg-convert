@@ -1,6 +1,21 @@
 #!/usr/bin/env bash
 #
-# Converts all X.svg in INDIR into the specified output format. (X.svg -> X.svg.png)
+# Fatpub-SVG-Convert – Converts all X.svg in INDIR into the specified output format. (X.svg -> X.svg.png)
+# Copyright (C) 2022 Henning Schwentner
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
 #
 # Usage: convert-svg-files 'input directory' 'output directory' 'output_format' 'dpi for PNG conversion'
 # Example: convert-svg-files manuscript/images tmp/images eps 1200
