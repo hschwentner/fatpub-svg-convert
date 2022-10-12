@@ -54,7 +54,7 @@ DPI=${4}
 mkdir -p ${OUTDIR}
 OUTDIR=`realpath ${OUTDIR}`
 
-pushd ${INDIR}
+pushd ${INDIR} > /dev/null
 
 for subdir in */; do
     echo "Entering ${subdir}"
@@ -89,4 +89,4 @@ for subdir in */; do
 done
 wait
 
-popd
+popd > /dev/null
