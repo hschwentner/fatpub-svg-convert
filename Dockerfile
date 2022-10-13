@@ -1,7 +1,7 @@
 FROM ubuntu:22.04
 
 #ARG INKSCAPE_VERSION=1.1
-ARG DRAWIO_VERSION=19.0.3
+ARG DRAWIO_VERSION=20.3.0
 
 # Install pdftops
 RUN apt-get update && apt-get install -y \
