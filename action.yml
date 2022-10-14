@@ -14,7 +14,12 @@ runs:
   using: 'docker'
   image: 'Dockerfile'
   args:
-    - ${{ inputs.indir }}
+    - --output-directory
     - ${{ inputs.outdir }}
+    - --output-format
     - ${{ inputs.outformat }}
+    - --dpi
     - ${{ inputs.dpi }}
+    - --parallel
+    - false
+    - ${{ inputs.indir }}

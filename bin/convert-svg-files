@@ -15,23 +15,34 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#
-#
-# Usage: convert-svg-files 'input directory' 'output directory' 'output_format' 'dpi for PNG conversion'
-# Example: convert-svg-files manuscript/images tmp/images eps 1200
 
+IFS='' read -r -d '' SCRIPT_USAGE <<EOF
+  usage:  $0 [-h/--help | -o|--output-directory <output directory> -f|--output-format <output format> --dpi <dpi> --parallel <bool> <input directory>]
+   e.g.:  $0 --output-directory tmp/imgages --output-format png --dpi 900 --parallel true manuscript/images
+options:
+                                   -h/--help  print this help string
+    -o|--output-directory <output directory>  the directory where the converted files should be stored
+          -f|--output-format <output format>  the format the SVG files should be converted to. Possible values: png eps
+                                 --dpi <dpi>  the dots per inch. Typical values: 600 900
+                           --parallel <bool>  if the files should be converted in parallel or one after the other. Possible values: true false
+EOF
+
+set -e
+set -u
+set -o pipefail
+
+# Enable job control
+set -m
 
 # Ignore empty directories
 shopt -s nullglob
 
-# Use headless X server and no paralellization on Linux
+
+# Use headless X server on Linux
 if [[ "$OSTYPE" == "darwin"* ]]; then
     DRAWIO='drawio'
-    FOREGROUND=''
 else
     DRAWIO='xvfb-run -a drawio'
-    set -m
-    FOREGROUND='fg'
 
 # In a Docker container we need something like this:
 #    DRAWIO="${DRAWIO} --no-sandbox"
@@ -39,17 +50,78 @@ else
 #    dbus-daemon --config-file=/usr/share/dbus-1/system.conf --print-address
 fi
 
+echo 2
 
-if test $# != 4
-then
-    echo "Please specify exactly four parameters with input directory, output directory, an output format like: png or eps, and a dpi number like 300."
-    exit 1
+
+# Parse arguments
+POSITIONAL_ARGS=()
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -h|--help)
+      echo "${SCRIPT_USAGE}"
+      exit 0
+      ;;
+    -o|--output-directory)
+      OUTDIR="$2"
+      shift # past argument
+      shift # past value
+      ;;
+    -f|--output-format)
+      OUTPUTFORMAT="$2"
+      shift # past argument
+      shift # past value
+      ;;
+    --dpi)
+      DPI="$2"
+      shift # past argument
+      shift # past value
+      ;;
+    --parallel)
+      PARALLEL="$2"
+      shift # past argument
+      shift # past value
+      ;;
+    -*|--*)
+      echo "Unknown option $1"
+      exit 1
+      ;;
+    *)
+      POSITIONAL_ARGS+=("$1") # save positional arg
+      shift # past argument
+      ;;
+  esac
+done
+
+set -- "${POSITIONAL_ARGS[@]}" # restore positional parameters
+
+INDIR="$1"
+
+
+# Check params and args
+[[ $# > 1 ]] && echo "Too many arguments." && exit 1
+
+[[ ${INDIR} == '' ]] && echo "Please specify an input directory." && exit 1
+[ ! -d "$INDIR" ] && echo "Input directory $INDIR does not exist." && exit 1
+
+[[ ${OUTDIR} == '' ]] && echo "Please specify an output directory." && exit 1
+[ ! -d "$OUTDIR" ] && echo "Output directory $OUTDIR does not exist." && exit 1
+
+[[ ${OUTPUTFORMAT} == '' ]] && echo "Please specify an output format like png or eps." && exit 1
+
+[[ ${DPI} == '' ]] && echo "Please specify the output DPI." && exit 1
+
+[[ ${PARALLEL} == '' ]] && echo "Please specify if you want to run in parallel or not." && exit 1
+
+
+
+if [[ ${PARALLEL} == "true" ]]; then
+    FOREGROUND=''
+else
+    FOREGROUND='fg'
 fi
 
-INDIR=${1}
-OUTDIR=${2}
-OUTPUTFORMAT=${3}
-DPI=${4}
+
 
 mkdir -p ${OUTDIR}
 OUTDIR=`realpath ${OUTDIR}`
