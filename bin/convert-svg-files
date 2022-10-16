@@ -105,7 +105,6 @@ INDIR="$1"
 [ ! -d "$INDIR" ] && echo "Input directory $INDIR does not exist." && exit 1
 
 [[ ${OUTDIR} == '' ]] && echo "Please specify an output directory." && exit 1
-[ ! -d "$OUTDIR" ] && echo "Output directory $OUTDIR does not exist." && exit 1
 
 [[ ${OUTPUTFORMAT} == '' ]] && echo "Please specify an output format like png or eps." && exit 1
 
