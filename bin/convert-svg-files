@@ -32,6 +32,9 @@ INFO="${TEXT_BOLD}${TEXT_BLUE}INFO:${TEXT_NORMAL}"
 WARN="${TEXT_BOLD}${TEXT_YELLOW}WARNING:${TEXT_NORMAL}"
 ERROR="${TEXT_BOLD}${TEXT_RED}ERROR:${TEXT_NORMAL}"
 
+START="${TEXT_BOLD}${TEXT_BLUE}START:${TEXT_NORMAL}"
+DONE="\t${TEXT_BOLD}${TEXT_GREEN}DONE:${TEXT_NORMAL}"
+
 
 IFS='' read -r -d '' SCRIPT_USAGE <<EOF
   usage:  $0 [-h/--help | -o|--output-directory <output directory> -f|--output-format <output format> --dpi <dpi> --parallel <bool> <input directory>]
@@ -39,7 +42,7 @@ IFS='' read -r -d '' SCRIPT_USAGE <<EOF
 options:
                                    -h/--help  print this help string
     -o|--output-directory <output directory>  the directory where the converted files should be stored
-          -f|--output-format <output format>  the format the SVG files should be converted to. Possible values: png eps
+          -f|--output-format <output format>  the format the SVG files should be converted to. Possible values: png pdf eps
                                  --dpi <dpi>  the dots per inch. Typical values: 600 900
                            --parallel <bool>  if the files should be converted in parallel or one after the other. Possible values: true false
 EOF
@@ -121,7 +124,7 @@ INDIR="$1"
 
 [[ ${OUTDIR} == '' ]] && echo "Please specify an output directory." && exit 1
 
-[[ ${OUTPUTFORMAT} == '' ]] && echo "Please specify an output format like png or eps." && exit 1
+[[ ${OUTPUTFORMAT} == '' ]] && echo "Please specify an output format like png, pdf, or eps." && exit 1
 
 [[ ${DPI} == '' ]] && echo "Please specify the output DPI." && exit 1
 
@@ -148,29 +151,33 @@ for subdir in */; do
     
     for svgfile in ${subdir}*.svg; do
         if [[ ${svgfile} == *.drawio.svg ]]; then
-            echo -e "\t${INFO} Converting ${TEXT_DARKGRAY}${svgfile}${TEXT_NORMAL} with Draw.io"
+            echo -e "\t${START} Draw.io conversion of ${TEXT_DARKGRAY}${svgfile}${TEXT_NORMAL}"
             if [ ${OUTPUTFORMAT} == png ]; then
                 ${DRAWIO} --export --scale 10 --output ${OUTDIR}/${svgfile}.png ${svgfile} > /dev/null \
-                && echo -e "\t${INFO} Converted ${TEXT_DARKGRAY}${svgfile}${TEXT_NORMAL} with Draw.io" \
-                & ${FOREGROUND}
+                && echo -e "\t${DONE} Draw.io conversion of ${TEXT_DARKGRAY}${svgfile}${TEXT_NORMAL}" \
+                & ${FOREGROUND} > /dev/null
+            elif  [ ${OUTPUTFORMAT} == pdf ]; then
+                ${DRAWIO} --export --crop --output ${OUTDIR}/${svgfile}.pdf ${svgfile} > /dev/null \
+                && echo -e "\t${DONE} Draw.io conversion of ${TEXT_DARKGRAY}${svgfile}${TEXT_NORMAL}" \
+                & ${FOREGROUND} > /dev/null
             elif  [ ${OUTPUTFORMAT} == eps ]; then
                 ${DRAWIO} --export --crop --output ${OUTDIR}/${svgfile}.pdf ${svgfile} > /dev/null \
                 && pdftops -eps -r ${DPI} ${OUTDIR}/${svgfile}.pdf \
                 && rm ${OUTDIR}/${svgfile}.pdf \
-                && echo -e "\t${INFO} Converted ${TEXT_DARKGRAY}${svgfile}${TEXT_NORMAL} with Draw.io" \
-                & ${FOREGROUND}
+                && echo -e "\t${DONE} Draw.io conversion of ${TEXT_DARKGRAY}${svgfile}${TEXT_NORMAL}" \
+                & ${FOREGROUND} > /dev/null
             else
                 exit 2
             fi
         else
-            echo -e "\t${INFO} Converting ${TEXT_DARKGRAY}${svgfile}${TEXT_NORMAL} with Inkscape"
+            echo -e "\t${START} Inkscape conversion of ${TEXT_DARKGRAY}${svgfile}${TEXT_NORMAL}"
             inkscape \
                 --export-dpi=${DPI} \
                 --export-filename=${OUTDIR}/${svgfile}.${OUTPUTFORMAT} \
                 ${svgfile} \
                 > /dev/null \
-            && echo -e "\t${INFO} Converted ${TEXT_DARKGRAY}${svgfile}${TEXT_NORMAL} with Inkscape" \
-            & ${FOREGROUND}
+            && echo -e "\t${DONE} Inkscape conversion of ${TEXT_DARKGRAY}${svgfile}${TEXT_NORMAL}" \
+            & ${FOREGROUND} > /dev/null
         fi
     done
     echo -e "${INFO} Leaving ${TEXT_DARKGRAY}${subdir}${TEXT_NORMAL}"
