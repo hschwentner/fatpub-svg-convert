@@ -1,6 +1,6 @@
 # action.yml
 name: 'GitHub Action for SVG conversion'
-description: 'Convert SVG files to PNG or EPS with Draw.io and Inkscape ready for Fatpub'
+description: 'Convert SVG files to PNG, PDF, or EPS with Draw.io and Inkscape ready for Fatpub'
 inputs:
   indir:
     required: true
