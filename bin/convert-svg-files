@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Fatpub-SVG-Convert – Converts all X.svg in INDIR into the specified output format. (X.svg -> X.svg.png)
-# Copyright (C) 2022 Henning Schwentner
+# Copyright (C) 2023 Henning Schwentner
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,6 +15,23 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+# Terminal colors
+TEXT_RED='\e[31m'
+TEXT_GREEN='\e[32m'
+TEXT_YELLOW='\e[33m'
+TEXT_BLUE='\e[34m'
+TEXT_DARKGRAY='\e[90m'
+
+TEXT_BOLD='\e[1m'
+
+TEXT_NORMAL='\e[0m' # No Color, no formatting
+
+
+INFO="${TEXT_BOLD}${TEXT_BLUE}INFO:${TEXT_NORMAL}"
+WARN="${TEXT_BOLD}${TEXT_YELLOW}WARNING:${TEXT_NORMAL}"
+ERROR="${TEXT_BOLD}${TEXT_RED}ERROR:${TEXT_NORMAL}"
+
 
 IFS='' read -r -d '' SCRIPT_USAGE <<EOF
   usage:  $0 [-h/--help | -o|--output-directory <output directory> -f|--output-format <output format> --dpi <dpi> --parallel <bool> <input directory>]
@@ -49,8 +66,6 @@ else
 #    mkdir -p /var/run/dbus
 #    dbus-daemon --config-file=/usr/share/dbus-1/system.conf --print-address
 fi
-
-echo 2
 
 
 # Parse arguments
@@ -128,35 +143,37 @@ OUTDIR=`realpath ${OUTDIR}`
 pushd ${INDIR} > /dev/null
 
 for subdir in */; do
-    echo "Entering ${subdir}"
+    echo -e "${INFO} Entering ${TEXT_DARKGRAY}${subdir}${TEXT_NORMAL}"
     mkdir -p ${OUTDIR}/${subdir}
     
     for svgfile in ${subdir}*.svg; do
         if [[ ${svgfile} == *.drawio.svg ]]; then
-            #echo "Converting ${svgfile} with Draw.io"
+            echo -e "\t${INFO} Converting ${TEXT_DARKGRAY}${svgfile}${TEXT_NORMAL} with Draw.io"
             if [ ${OUTPUTFORMAT} == png ]; then
-                ${DRAWIO} --export --scale 10 --output ${OUTDIR}/${svgfile}.png ${svgfile} \
-                && echo "Converted ${svgfile} with Draw.io" \
+                ${DRAWIO} --export --scale 10 --output ${OUTDIR}/${svgfile}.png ${svgfile} > /dev/null \
+                && echo -e "\t${INFO} Converted ${TEXT_DARKGRAY}${svgfile}${TEXT_NORMAL} with Draw.io" \
                 & ${FOREGROUND}
             elif  [ ${OUTPUTFORMAT} == eps ]; then
-                ${DRAWIO} --export --crop --output ${OUTDIR}/${svgfile}.pdf ${svgfile} \
+                ${DRAWIO} --export --crop --output ${OUTDIR}/${svgfile}.pdf ${svgfile} > /dev/null \
                 && pdftops -eps -r ${DPI} ${OUTDIR}/${svgfile}.pdf \
                 && rm ${OUTDIR}/${svgfile}.pdf \
-                && echo "Converted ${svgfile} with Draw.io" \
+                && echo -e "\t${INFO} Converted ${TEXT_DARKGRAY}${svgfile}${TEXT_NORMAL} with Draw.io" \
                 & ${FOREGROUND}
             else
                 exit 2
             fi
         else
-            #echo "Converting ${svgfile} with Inkscape"
+            echo -e "\t${INFO} Converting ${TEXT_DARKGRAY}${svgfile}${TEXT_NORMAL} with Inkscape"
             inkscape \
                 --export-dpi=${DPI} \
                 --export-filename=${OUTDIR}/${svgfile}.${OUTPUTFORMAT} \
                 ${svgfile} \
-            && echo "Converted ${svgfile} with Inkscape" \
+                > /dev/null \
+            && echo -e "\t${INFO} Converted ${TEXT_DARKGRAY}${svgfile}${TEXT_NORMAL} with Inkscape" \
             & ${FOREGROUND}
         fi
     done
+    echo -e "${INFO} Leaving ${TEXT_DARKGRAY}${subdir}${TEXT_NORMAL}"
 done
 wait
 
