@@ -162,6 +162,7 @@ for subdir in */; do
                 & ${FOREGROUND} > /dev/null
             elif  [ ${OUTPUTFORMAT} == eps ]; then
                 ${DRAWIO} --export --crop --output ${OUTDIR}/${svgfile}.pdf ${svgfile} > /dev/null \
+                && qpdf ${OUTDIR}/${svgfile}.pdf --pages . 1 -- --replace-input \
                 && pdftops -eps -r ${DPI} ${OUTDIR}/${svgfile}.pdf \
                 && rm ${OUTDIR}/${svgfile}.pdf \
                 && echo -e "\t${DONE} Draw.io conversion of ${TEXT_DARKGRAY}${svgfile}${TEXT_NORMAL}" \
