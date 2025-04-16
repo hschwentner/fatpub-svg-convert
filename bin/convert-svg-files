@@ -70,6 +70,7 @@ else
 #    dbus-daemon --config-file=/usr/share/dbus-1/system.conf --print-address
 fi
 
+PDFVERSION=''
 
 # Parse arguments
 POSITIONAL_ARGS=()
@@ -87,6 +88,11 @@ while [[ $# -gt 0 ]]; do
       ;;
     -f|--output-format)
       OUTPUTFORMAT="$2"
+      shift # past argument
+      shift # past value
+      ;;
+    --pdf-version)
+      PDFVERSION="$2"
       shift # past argument
       shift # past value
       ;;
@@ -116,6 +122,7 @@ set -- "${POSITIONAL_ARGS[@]}" # restore positional parameters
 INDIR="$1"
 
 
+
 # Check params and args
 [[ $# > 1 ]] && echo "Too many arguments." && exit 1
 
@@ -125,6 +132,7 @@ INDIR="$1"
 [[ ${OUTDIR} == '' ]] && echo "Please specify an output directory." && exit 1
 
 [[ ${OUTPUTFORMAT} == '' ]] && echo "Please specify an output format like png, pdf, or eps." && exit 1
+[[ ${PDFVERSION} != '' && ${OUTPUTFORMAT} != 'pdf' ]] && echo "PDF version can only be specified when output format is pdf." && exit 1
 
 [[ ${DPI} == '' ]] && echo "Please specify the output DPI." && exit 1
 
@@ -160,6 +168,10 @@ for subdir in */; do
                 ${DRAWIO} --export --crop --output ${OUTDIR}/${svgfile}.pdf ${svgfile} > /dev/null \
                 && echo -e "\t${DONE} Draw.io conversion of ${TEXT_DARKGRAY}${svgfile}${TEXT_NORMAL}" \
                 & ${FOREGROUND} > /dev/null
+                if [ ${PDFVERSION} != '' ]; then
+                  qpdf --replace-input --force-version=${PDFVERSION} "${OUTDIR}/${svgfile}.pdf" \
+                  && echo -e "\t${DONE} PDF version set to ${PDFVERSION} for ${TEXT_DARKGRAY}${OUTDIR}/${svgfile}.pdf${TEXT_NORMAL}"                
+                fi
             elif  [ ${OUTPUTFORMAT} == eps ]; then
                 ${DRAWIO} --export --crop --output ${OUTDIR}/${svgfile}.pdf ${svgfile} > /dev/null \
                 && qpdf ${OUTDIR}/${svgfile}.pdf --pages . 1 -- --replace-input \
